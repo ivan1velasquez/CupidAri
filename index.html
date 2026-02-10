@@ -3,219 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Ari Cupido Adventurer</title>
+    <title>Misión Simo: San Valentín ❤️</title>
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            margin: 0; 
-            padding: 0; 
             overflow: hidden; 
-            background: #f06292; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffdee9; /* Fondo de respaldo para toda la web */
+            font-family: 'Arial', sans-serif; 
+            touch-action: none; 
         }
         canvas { 
             display: block; 
             margin: 0 auto; 
-            background-color: #add8e6; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background-color: transparent; /* Eliminado el gris oscuro */
         }
+        
         #ui {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            text-align: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            pointer-events: none;
-            z-index: 10;
+            position: absolute; top: 20px; width: 100%; text-align: center;
+            color: white; font-size: 24px; font-weight: bold;
+            text-shadow: 2px 2px 0px #ff69b4; pointer-events: none; z-index: 10;
         }
-        #mensaje-victoria {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 25px;
-            text-align: center;
-            border: 8px solid #ff85a2;
-            width: 85%;
-            max-width: 400px;
-            z-index: 20;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+        /* Modals con fondo blanco sólido para legibilidad pero sin oscurecer el juego */
+        .modal {
+            display: none; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); background: white;
+            padding: 30px; border-radius: 20px; text-align: center;
+            border: 6px solid #ff69b4; width: 85%; max-width: 400px; z-index: 100;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
-        h1 { color: #ff4d6d; margin-top: 0; }
-        p { color: #555; line-height: 1.5; }
+
+        /* Botón de Acción optimizado para móvil */
+        .btn-accion {
+            background: #ff69b4; color: white; border: none;
+            padding: 15px 30px; border-radius: 30px; font-weight: bold;
+            margin-top: 20px; cursor: pointer; font-size: 18px;
+            display: inline-block;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+        }
+
+        /* Emoji de Carta Central Animado */
+        #btn-carta {
+            display: none; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); font-size: 90px; cursor: pointer;
+            background: none; border: none; z-index: 150;
+            animation: heartBeat 1.5s infinite;
+            touch-action: manipulation;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            14% { transform: translate(-50%, -50%) scale(1.3); }
+            28% { transform: translate(-50%, -50%) scale(1); }
+            42% { transform: translate(-50%, -50%) scale(1.3); }
+            70% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Contenedor Final */
+        #sobre-abierto {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: none; z-index: 200; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+
+        .carta-texto {
+            background: #fff0f5; color: #d02090; padding: 25px;
+            border-radius: 15px; border: 3px dashed #ff69b4;
+            max-width: 350px; text-align: center; line-height: 1.6;
+            transform: scale(0); transition: transform 0.5s;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.2);
+        }
+
+        #foto-revelada {
+            width: 280px; border: 6px solid white; border-radius: 15px;
+            margin-bottom: 20px; opacity: 0; transition: opacity 1s;
+        }
     </style>
 </head>
 <body>
 
-<div id="ui">Puntos: 0 / 10</div>
+<div id="ui">Piezas de Simo: 0 / 9</div>
 
-<div id="mensaje-victoria">
-    <h1>¡Felicidades, mi amor! ❤️</h1>
-    <p>¡Ari logró llegar a tu corazón!</p>
-    <p><strong>"Gracias por ser mi San Valentín. Te amo muchísimo."</strong></p>
-    <button onclick="location.reload()" style="background:#ff85a2; border:none; color:white; padding:10px 20px; border-radius:10px; cursor:pointer;">Jugar de nuevo</button>
+<div id="pantalla-inicio" class="modal" style="display: block;">
+    <h2 style="color: #ff1493;">¡Hola, mi amor! 🐹</h2>
+    <p style="margin: 15px 0;">Recolecta las 9 partes de la foto de Simo para ver tu sorpresa.</p>
+    <button class="btn-accion" id="btn-comenzar">¡Comenzar!</button>
+</div>
+
+<div id="pantalla-error" class="modal">
+    <h2 style="color: #ff1493;">¡Casi! 😢</h2>
+    <p style="margin: 10px 0;">Ari se tropezó. ¡Inténtalo de nuevo!</p>
+    <button class="btn-accion" id="btn-reintentar">Reintentar</button>
+</div>
+
+<button id="btn-carta">📩</button>
+
+<div id="sobre-abierto">
+    <img id="foto-revelada" src="assets/simo_full.webp">
+    <div class="carta-texto" id="carta-contenido">
+        <p><strong>Para mi niña hermosa:</strong></p>
+        <p style="margin: 10px 0;">"Armaste cada pieza de nuestro rompecabezas. Eres lo mejor que me ha pasado."</p>
+        <p>— Te amo ❤️</p>
+        <button class="btn-accion" onclick="location.reload()">Jugar de nuevo</button>
+    </div>
 </div>
 
 <canvas id="gameCanvas"></canvas>
 
 <script>
-/** * Lógica del Videojuego para San Valentín 
- * Aprovechando tus conocimientos en desarrollo web
- */
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const marcador = document.getElementById("ui");
-const winScreen = document.getElementById("mensaje-victoria");
 
-// Adaptación de pantalla
-canvas.width = window.innerWidth > 450 ? 400 : window.innerWidth;
+canvas.width = window.innerWidth > 480 ? 480 : window.innerWidth;
 canvas.height = window.innerHeight;
 
-// --- RECURSOS ---
-const bgImg = new Image();
-bgImg.src = 'background.jpg'; // Asegúrate de que el nombre coincida
+// --- ASSETS ---
+const assets = {};
+const piezasFotos = [];
+let cargados = 0;
 
-// --- CONFIGURACIÓN DEL JUEGO ---
-let score = 0;
-const goal = 10; // Puntos para ganar
-let gameRunning = true;
-let frame = 0;
-
-const ari = {
-    x: 50,
-    y: canvas.height / 2,
-    w: 50,
-    h: 40,
-    gravity: 0.4,
-    lift: -7,
-    velocity: 0
-};
-
-const pipes = [];
-const pipeWidth = 70;
-const pipeGap = 170; // Espacio entre tubos
-
-function drawAri() {
-    // Prototipo de Ari (Hitbox con color de cuy)
-    ctx.fillStyle = "#d7b197"; // Color base
-    ctx.beginPath();
-    ctx.roundRect(ari.x, ari.y, ari.w, ari.h, 10);
-    ctx.fill();
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Alitas de Cupido
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.ellipse(ari.x, ari.y + 10, 15, 8, Math.PI / 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+function cargar(n, r) {
+    const img = new Image();
+    img.src = r;
+    img.onload = () => cargados++;
+    assets[n] = img;
 }
 
-function update() {
-    if (!gameRunning) return;
+cargar('fondo', 'assets/background.jpg');
+cargar('tubo', 'assets/pipe.png');
+cargar('ariUp', 'assets/ari_up.png');
+cargar('ariDown', 'assets/ari_down.png');
 
-    ari.velocity += ari.gravity;
-    ari.y += ari.velocity;
+for(let i=1; i<=9; i++) {
+    const img = new Image();
+    img.src = `assets/simo${i}.webp`;
+    piezasFotos.push(img);
+}
 
-    // Colisión con límites
-    if (ari.y + ari.h > canvas.height || ari.y < 0) reset();
-
-    // Generar tuberías
-    if (frame % 110 === 0) {
-        let minHeight = 50;
-        let maxHeight = canvas.height - pipeGap - minHeight;
-        let h = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
-        pipes.push({ x: canvas.width, top: h, passed: false });
+// --- CONFETI ---
+const particles = [];
+function createConfetti() {
+    for (let i = 0; i < 100; i++) {
+        particles.push({
+            x: canvas.width / 2, y: canvas.height / 2,
+            size: Math.random() * 8 + 4,
+            color: `hsl(${Math.random() * 30 + 330}, 100%, 65%)`, // Tonos rosas/púrpuras
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            gravity: 0.1, opacity: 1
+        });
     }
+}
 
-    // Actualizar tuberías
-    for (let i = pipes.length - 1; i >= 0; i--) {
-        pipes[i].x -= 2.5; // Velocidad
+// --- FÍSICA ---
+let estado = 'inicio';
+let score = 0;
+let frames = 0;
+let tubosContador = 0;
+const vel = 2.3;
 
-        // Dibujar Tubería Rosada con Borde Negro
-        ctx.fillStyle = "#ff85a2";
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 4;
+const ari = {
+    x: 60, y: canvas.height/2, w: 60, h: 50,
+    v: 0, g: 0.38, salto: -5.8, // Salto suave solicitado
+    rot: 0, aleteo: 0,
+    actualizar() {
+        this.v += this.g;
+        this.y += this.v;
+        this.rot = this.v < 0 ? -0.2 : 0.2;
+        if(this.aleteo > 0) this.aleteo--;
+        if(this.y > canvas.height || this.y < 0) morir();
+    },
+    dibujar() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        let img = this.aleteo > 0 ? assets.ariDown : assets.ariUp;
+        if(img.complete) ctx.drawImage(img, -this.w/2, -this.h/2, this.w, this.h);
+        ctx.restore();
+    }
+};
 
-        // Tubo Superior
-        ctx.fillRect(pipes[i].x, 0, pipeWidth, pipes[i].top);
-        ctx.strokeRect(pipes[i].x, -5, pipeWidth, pipes[i].top + 5);
-
-        // Tubo Inferior
-        let bY = pipes[i].top + pipeGap;
-        let bH = canvas.height - bY;
-        ctx.fillRect(pipes[i].x, bY, pipeWidth, bH);
-        ctx.strokeRect(pipes[i].x, bY, pipeWidth, bH + 5);
-
-        // Detección de Colisiones
-        if (ari.x < pipes[i].x + pipeWidth && ari.x + ari.w > pipes[i].x) {
-            if (ari.y < pipes[i].top || ari.y + ari.h > pipes[i].top + pipeGap) {
-                reset();
+const nivel = {
+    tubos: [], piezas: [],
+    actualizar() {
+        if(frames % 110 === 0) {
+            tubosContador++;
+            let gap = 200;
+            let top = Math.random() * (canvas.height - gap - 240) + 120;
+            this.tubos.push({x: canvas.width, t: top, b: top + gap});
+            
+            // Intercalado: Pieza cada 2 tuberías
+            if(tubosContador % 2 === 0 && score < 9) {
+                this.piezas.push({
+                    x: canvas.width + 120, y: top + gap/2, img: piezasFotos[score]
+                });
             }
         }
 
-        // Puntaje
-        if (!pipes[i].passed && pipes[i].x < ari.x) {
-            pipes[i].passed = true;
-            score++;
-            marcador.innerText = `Puntos: ${score} / ${goal}`;
-            if (score >= goal) win();
-        }
+        this.tubos.forEach((t, i) => {
+            t.x -= vel;
+            if(ari.x + 15 > t.x && ari.x - 15 < t.x + 80) {
+                if(ari.y - 12 < t.t || ari.y + 12 > t.b) morir();
+            }
+            if(t.x < -100) this.tubos.splice(i, 1);
+        });
 
-        // Limpiar memoria
-        if (pipes[i].x + pipeWidth < 0) pipes.splice(i, 1);
+        this.piezas.forEach((p, i) => {
+            p.x -= vel;
+            let dist = Math.hypot(ari.x - p.x, ari.y - p.y);
+            if(dist < 45) {
+                this.piezas.splice(i, 1);
+                score++;
+                marcador.innerText = `Piezas de Simo: ${score} / 9`;
+                if(score === 9) ganar();
+            }
+        });
+    },
+    dibujar() {
+        this.tubos.forEach(t => {
+            if(assets.tubo.complete) {
+                ctx.save(); ctx.translate(t.x + 40, t.t); ctx.scale(1, -1);
+                ctx.drawImage(assets.tubo, -40, 0, 80, t.t); ctx.restore();
+                ctx.drawImage(assets.tubo, t.x, t.b, 80, canvas.height - t.b);
+            }
+        });
+        this.piezas.forEach(p => {
+            if(p.img.complete) {
+                ctx.drawImage(p.img, p.x - 25, p.y - 25, 55, 55);
+                ctx.strokeStyle = "white"; ctx.lineWidth = 3;
+                ctx.strokeRect(p.x - 25, p.y - 25, 55, 55);
+            }
+        });
     }
-}
-
-function drawBackground() {
-    if (bgImg.complete) {
-        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.fillStyle = "#add8e6";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-}
-
-function reset() {
-    ari.y = canvas.height / 2;
-    ari.velocity = 0;
-    score = 0;
-    pipes.length = 0;
-    marcador.innerText = `Puntos: 0 / ${goal}`;
-}
-
-function win() {
-    gameRunning = false;
-    winScreen.style.display = "block";
-}
+};
 
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBackground();
-    drawAri();
-    update();
-    frame++;
-    if (gameRunning) requestAnimationFrame(loop);
+    if(assets.fondo.complete) {
+        ctx.drawImage(assets.fondo, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "#ffdee9";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    if(estado === 'jugando') {
+        ari.actualizar();
+        nivel.actualizar();
+        frames++;
+    }
+    
+    nivel.dibujar();
+    ari.dibujar();
+
+    if (particles.length > 0) {
+        particles.forEach((p, i) => {
+            p.vy += p.gravity; p.x += p.vx; p.y += p.vy; p.opacity -= 0.008;
+            ctx.globalAlpha = Math.max(0, p.opacity); ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            if (p.opacity <= 0) particles.splice(i, 1);
+        });
+        ctx.globalAlpha = 1;
+    }
+    
+    requestAnimationFrame(loop);
 }
 
-// Controles
-const jump = (e) => {
-    if (e.type === "touchstart") e.preventDefault();
-    if (gameRunning) ari.velocity = ari.lift;
-};
+// --- GESTIÓN DE EVENTOS ---
+function iniciarJuego() {
+    document.getElementById('pantalla-inicio').style.display = 'none';
+    estado = 'jugando';
+}
 
-window.addEventListener("mousedown", jump);
-window.addEventListener("touchstart", jump, { passive: false });
-window.addEventListener("keydown", (e) => { if(e.code === "Space") jump(e); });
+function morir() {
+    estado = 'error';
+    document.getElementById('pantalla-error').style.display = 'block';
+}
+
+function reiniciarJuego() {
+    score = 0; frames = 0; tubosContador = 0;
+    ari.y = canvas.height/2; ari.v = 0;
+    nivel.tubos = []; nivel.piezas = [];
+    marcador.innerText = "Piezas de Simo: 0 / 9";
+    document.getElementById('pantalla-error').style.display = 'none';
+    estado = 'jugando';
+}
+
+function ganar() {
+    estado = 'ganado';
+    marcador.style.display = 'none';
+    document.getElementById('btn-carta').style.display = 'block';
+}
+
+function mostrarCarta() {
+    document.getElementById('btn-carta').style.display = 'none';
+    document.getElementById('sobre-abierto').style.display = 'flex';
+    setTimeout(() => {
+        document.getElementById('foto-revelada').style.opacity = 1;
+        document.getElementById('carta-contenido').style.transform = 'scale(1)';
+        createConfetti();
+    }, 300);
+}
+
+// BOTONES CON SOPORTE TÁCTIL DIRECTO
+document.getElementById('btn-comenzar').addEventListener('touchstart', (e) => { e.stopPropagation(); iniciarJuego(); });
+document.getElementById('btn-comenzar').addEventListener('click', iniciarJuego);
+
+document.getElementById('btn-reintentar').addEventListener('touchstart', (e) => { e.stopPropagation(); reiniciarJuego(); });
+document.getElementById('btn-reintentar').addEventListener('click', reiniciarJuego);
+
+document.getElementById('btn-carta').addEventListener('touchstart', (e) => { e.stopPropagation(); mostrarCarta(); });
+document.getElementById('btn-carta').addEventListener('click', mostrarCarta);
+
+const saltar = () => { if(estado === 'jugando') { ari.v = ari.salto; ari.aleteo = 10; } };
+
+window.addEventListener('touchstart', (e) => {
+    // Si el toque NO es en un botón, entonces es un salto
+    if (e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+        saltar();
+    }
+}, {passive: false});
+
+window.addEventListener('mousedown', (e) => {
+    if (e.target.tagName !== 'BUTTON') saltar();
+});
+
+window.addEventListener('keydown', (e) => { if(e.code === 'Space') saltar(); });
 
 loop();
 </script>
