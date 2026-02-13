@@ -24,7 +24,7 @@
         }
         .texto-click {
             color: #d02090; font-weight: bold; font-size: 20px;
-            animation: blink 1.5s infinite;
+            animation: blink 1.5s infinite; text-align: center; padding: 0 20px;
         }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
@@ -38,59 +38,38 @@
 
         .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 20px; text-align: center; border: 6px solid #ff69b4; width: 85%; max-width: 400px; z-index: 100; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
         
+        /* FIX: CENTRADO DE RECOMPENSA PARA MÓVILES */
         #pantalla-recompensa { 
             display: none; 
             position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            width: 90%; 
-            max-width: 400px; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; 
+            justify-content: center; /* Centrado absoluto vertical */
             z-index: 120; 
+            padding: 20px;
         }
         
         .texto-instruccion { 
-            background: white; 
-            color: #d02090; 
-            padding: 15px; 
-            border-radius: 12px; 
-            border: 3px solid #ff69b4; 
-            font-weight: bold; 
-            font-size: 16px; 
-            margin-bottom: 20px; 
-            width: 100%; 
-            text-align: center; 
+            background: white; color: #d02090; padding: 15px; border-radius: 12px; 
+            border: 3px solid #ff69b4; font-weight: bold; font-size: 16px; 
+            margin-bottom: 20px; width: 100%; max-width: 400px; text-align: center; 
         }
 
-        .marco-foto-blanco { width: 100%; background: white; border: 10px solid white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 25px; display: flex; justify-content: center; }
-        #foto-completa-revelada { width: 100%; height: auto; display: block; }
+        .marco-foto-blanco { width: 100%; max-width: 380px; background: white; border: 10px solid white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 25px; display: flex; justify-content: center; }
+        #foto-completa-revelada { width: 100%; height: auto; display: block; border-radius: 5px; }
 
         #carta-container { position: relative; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         #carta-container::before, #carta-container::after { content: ''; position: absolute; width: 85%; height: 85%; border-radius: 50%; border: 5px solid rgba(255, 105, 180, 0.7); animation: rippleEffect 2s infinite ease-out; z-index: -1; opacity: 0; }
         #carta-container::after { animation-delay: 0.6s; }
-
         #btn-carta-img { width: 140px; height: auto; filter: drop-shadow(0 8px 20px rgba(255, 105, 180, 0.6)); animation: heartBeat 1.5s infinite; }
 
         @keyframes heartBeat { 0% { transform: scale(1); } 14% { transform: scale(1.15); } 28% { transform: scale(1); } 42% { transform: scale(1.15); } 70% { transform: scale(1); } }
         @keyframes rippleEffect { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.8); opacity: 0; } }
 
-        #sobre-abierto { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; flex-direction: column; align-items: center; justify-content: center; }
-        
-        .carta-texto { 
-            background: #fff0f5; 
-            color: #d02090; 
-            padding: 35px; 
-            border-radius: 20px; 
-            border: 4px dashed #ff69b4; 
-            max-width: 480px; 
-            width: 90%; 
-            text-align: center; 
-            box-shadow: 0 10px 60px rgba(0,0,0,0.3); 
-            line-height: 1.5; 
-        }
+        #sobre-abierto { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 222, 233, 0.8); }
+        .carta-texto { background: #fff0f5; color: #d02090; padding: 35px; border-radius: 20px; border: 4px dashed #ff69b4; max-width: 480px; width: 92%; text-align: center; box-shadow: 0 10px 60px rgba(0,0,0,0.3); line-height: 1.5; }
         .btn-accion { background: #ff69b4; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 18px; }
     </style>
 </head>
@@ -155,7 +134,7 @@ canvas.width = logicalWidth * dpr; canvas.height = logicalHeight * dpr;
 canvas.style.width = logicalWidth + 'px'; canvas.style.height = logicalHeight + 'px';
 ctx.scale(dpr, dpr);
 
-// --- WEB AUDIO API ---
+// --- WEB AUDIO API UNIFICADA ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const buffers = {};
 async function loadSfx(url, name) {
@@ -163,38 +142,33 @@ async function loadSfx(url, name) {
         const response = await fetch(url);
         const arrayBuffer = await response.arrayBuffer();
         buffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
-    } catch(e) { console.error("Error cargando:", name); }
+    } catch(e) { console.error("Error cargando:", name, e); }
 }
 
-// Carga de sonidos
 loadSfx('assets/cuy_sound.m4a', 'cuy');
 loadSfx('assets/fart.m4a', 'fart');
 loadSfx('assets/item.m4a', 'item');
 loadSfx('assets/paper.m4a', 'paper');
 loadSfx('assets/yay.m4a', 'yay');
+loadSfx('assets/victory_music.mp3', 'victory'); // Carga masiva para evitar bloqueos
 
-function playSfx(name, fade = false) {
+function playSfx(name, loop = false) {
     if (!buffers[name]) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const source = audioCtx.createBufferSource();
     source.buffer = buffers[name];
-    const gainNode = audioCtx.createGain();
-    if (fade) {
-        const startTime = audioCtx.currentTime;
-        gainNode.gain.setValueAtTime(1.0, startTime);
-        gainNode.gain.linearRampToValueAtTime(0.01, startTime + buffers[name].duration);
-    } else { gainNode.gain.value = 1.0; }
-    source.connect(gainNode); gainNode.connect(audioCtx.destination); source.start(0);
+    source.loop = loop;
+    source.connect(audioCtx.destination);
+    source.start(0);
+    return source;
 }
 
 const musicGame = new Audio('assets/game_music.mp3');
-const musicVictory = new Audio('assets/victory_music.mp3');
-musicGame.volume = 0.35; musicVictory.volume = 0.35;
-musicGame.loop = true; musicVictory.loop = true;
+musicGame.volume = 0.35; musicGame.loop = true;
 
 // --- ASSETS IMÁGENES ---
-const assets = {}; const piezasFotos = []; let cargados = 0;
-function cargar(n, r) { const img = new Image(); img.src = r; img.onload = () => cargados++; assets[n] = img; }
+const assets = {}; const piezasFotos = [];
+function cargar(n, r) { const img = new Image(); img.src = r; assets[n] = img; }
 cargar('fondo', 'assets/background.jpg'); cargar('tubo', 'assets/pipe.png');
 cargar('ariUp', 'assets/ari_up.png'); cargar('ariDown', 'assets/ari_down.png');
 cargar('puzzleMask', 'assets/puzzle.png'); cargar('puzzleFrame', 'assets/frame.png');
@@ -204,7 +178,7 @@ const hearts = [];
 function createHearts() {
     for (let i = 0; i < 600; i++) { 
         hearts.push({
-            x: logicalWidth / 2, y: logicalHeight / 2 + 150,
+            x: logicalWidth / 2, y: logicalHeight / 2,
             size: Math.random() * 14 + 8,
             color: `hsl(${Math.random() * 50 + 320}, 100%, ${Math.random() * 30 + 60}%)`,
             vx: (Math.random() - 0.5) * 18, vy: (Math.random() * -22) - 8,  
@@ -215,58 +189,40 @@ function createHearts() {
 }
 
 function drawHeart(ctx, h) {
-    ctx.save();
-    ctx.translate(h.x, h.y); ctx.rotate(h.rotation);
+    ctx.save(); ctx.translate(h.x, h.y); ctx.rotate(h.rotation);
     ctx.globalAlpha = h.opacity; ctx.fillStyle = h.color;
     ctx.beginPath(); const s = h.size;
-    ctx.moveTo(0, s / 4); ctx.quadraticCurveTo(0, 0, -s / 2, 0); ctx.quadraticCurveTo(-s, 0, -s, s / 2);
-    ctx.quadraticCurveTo(-s, s, 0, s * 1.25); ctx.quadraticCurveTo(s, s, s, s / 2);
-    ctx.quadraticCurveTo(s, 0, s / 2, 0); ctx.quadraticCurveTo(0, 0, 0, s / 4);
+    ctx.moveTo(0, s/4); ctx.quadraticCurveTo(0, 0, -s/2, 0); ctx.quadraticCurveTo(-s, 0, -s, s/2);
+    ctx.quadraticCurveTo(-s, s, 0, s * 1.25); ctx.quadraticCurveTo(s, s, s, s/2);
+    ctx.quadraticCurveTo(s, 0, s/2, 0); ctx.quadraticCurveTo(0, 0, 0, s/4);
     ctx.fill(); ctx.restore();
 }
 
-// --- FUNCIÓN ACTUALIZADA PARA RELLENAR EL PUZZLE ---
 function drawSafePuzzlePiece(mainCtx, x, y, imgFragment) {
     if (!assets.puzzleMask.complete || !assets.puzzleFrame.complete) return;
     pCtx.clearRect(0, 0, pSize, pSize);
-
-    // Lógica para que la imagen rellene (aspect fill/cover) el área de la pieza
     const imgAspect = imgFragment.width / imgFragment.height;
-    const canvasAspect = pSize / pSize;
-    let renderW, renderH, renderX, renderY;
-
+    const canvasAspect = 1;
+    let rW, rH, rX, rY;
     if (imgAspect > canvasAspect) {
-        renderH = pSize;
-        renderW = pSize * imgAspect;
-        renderX = (pSize - renderW) / 2;
-        renderY = 0;
+        rH = pSize; rW = pSize * imgAspect; rX = (pSize - rW) / 2; rY = 0;
     } else {
-        renderW = pSize;
-        renderH = pSize / imgAspect;
-        renderX = 0;
-        renderY = (pSize - renderH) / 2;
+        rW = pSize; rH = pSize / imgAspect; rX = 0; rY = (pSize - rH) / 2;
     }
-
-    // Dibujar la imagen centrada y escalada para rellenar
-    pCtx.drawImage(imgFragment, renderX, renderY, renderW, renderH);
-    
+    pCtx.drawImage(imgFragment, rX, rY, rW, rH);
     pCtx.globalCompositeOperation = 'destination-in';
     pCtx.drawImage(assets.puzzleMask, 0, 0, pSize, pSize);
-    
     pCtx.globalCompositeOperation = 'source-over';
     pCtx.drawImage(assets.puzzleFrame, 0, 0, pSize, pSize);
-    
     mainCtx.drawImage(pCanvas, x, y);
 }
 
-let lastTime = performance.now(); let estado = 'splash'; let score = 0; let tubosContador = 0; const baseVel = 160; 
+let lastTime = performance.now(); let estado = 'splash'; let score = 0; let tubosContador = 0; 
 const ari = {
     x: 60, y: logicalHeight/2, w: 60, h: 50, v: 0, g: 1450, salto: -360, rot: 0, aleteo: 0,
     actualizar(dt) {
-        this.v += this.g * dt; this.y += this.v * dt;
-        this.rot = this.v < 0 ? -0.2 : 0.2;
-        if(this.aleteo > 0) this.aleteo -= dt * 60;
-        if(this.y > logicalHeight || this.y < 0) morir();
+        this.v += this.g * dt; this.y += this.v * dt; this.rot = this.v < 0 ? -0.2 : 0.2;
+        if(this.aleteo > 0) this.aleteo -= dt * 60; if(this.y > logicalHeight || this.y < 0) morir();
     },
     dibujar() {
         ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rot);
@@ -282,35 +238,15 @@ const nivel = {
     actualizar(dt) {
         this.nextTubo -= dt;
         if(this.nextTubo <= 0) {
-            this.nextTubo = 1.4; tubosContador++;
-            let gap = 200; let top = Math.random() * (logicalHeight - gap - 240) + 120;
+            this.nextTubo = 1.4; tubosContador++; let gap = 200; let top = Math.random() * (logicalHeight - gap - 240) + 120;
             this.tubos.push({x: logicalWidth, t: top, b: top + gap});
-            if(tubosContador % 2 === 0 && score < 9) {
-                this.piezas.push({ x: logicalWidth + 120, y: top + gap/2 - 30, img: piezasFotos[score] });
-            }
+            if(tubosContador % 2 === 0 && score < 9) { this.piezas.push({ x: logicalWidth + 120, y: top + gap/2 - 30, img: piezasFotos[score] }); }
         }
-        this.tubos.forEach((t, i) => {
-            t.x -= baseVel * dt;
-            if(ari.x + 18 > t.x && ari.x - 18 < t.x + 80 && (ari.y - 15 < t.t || ari.y + 15 > t.b)) morir();
-            if(t.x < -100) this.tubos.splice(i, 1);
-        });
-        this.piezas.forEach((p, i) => {
-            p.x -= baseVel * dt;
-            if(Math.hypot(ari.x - (p.x + 30), ari.y - (p.y + 30)) < 48) {
-                this.piezas.splice(i, 1); score++; playSfx('item');
-                scoreDisplay.innerText = `Simopiezas: ${score} / 9`;
-                if(score === 9) ganar();
-            }
-        });
+        this.tubos.forEach((t, i) => { t.x -= 160 * dt; if(ari.x + 18 > t.x && ari.x - 18 < t.x + 80 && (ari.y - 15 < t.t || ari.y + 15 > t.b)) morir(); if(t.x < -100) this.tubos.splice(i, 1); });
+        this.piezas.forEach((p, i) => { p.x -= 160 * dt; if(Math.hypot(ari.x - (p.x + 30), ari.y - (p.y + 30)) < 48) { this.piezas.splice(i, 1); score++; playSfx('item'); scoreDisplay.innerText = `Simopiezas: ${score} / 9`; if(score === 9) ganar(); } });
     },
     dibujar() {
-        this.tubos.forEach(t => {
-            if(assets.tubo && assets.tubo.complete) {
-                ctx.save(); ctx.translate(t.x + 40, t.t); ctx.scale(1, -1);
-                ctx.drawImage(assets.tubo, -40, 0, 80, t.t); ctx.restore();
-                ctx.drawImage(assets.tubo, t.x, t.b, 80, logicalHeight - t.b);
-            }
-        });
+        this.tubos.forEach(t => { if(assets.tubo && assets.tubo.complete) { ctx.save(); ctx.translate(t.x + 40, t.t); ctx.scale(1, -1); ctx.drawImage(assets.tubo, -40, 0, 80, t.t); ctx.restore(); ctx.drawImage(assets.tubo, t.x, t.b, 80, logicalHeight - t.b); } });
         this.piezas.forEach(p => { if(p.img && p.img.complete) drawSafePuzzlePiece(ctx, p.x, p.y, p.img); });
     }
 };
@@ -321,12 +257,7 @@ function loop(timestamp) {
     if(assets.fondo && assets.fondo.complete) ctx.drawImage(assets.fondo, 0, 0, logicalWidth, logicalHeight);
     if(estado === 'jugando') { ari.actualizar(dt); nivel.actualizar(dt); }
     nivel.dibujar(); ari.dibujar();
-    hearts.forEach((h, i) => {
-        h.vy += h.gravity; h.x += h.vx; h.y += h.vy; h.rotation += h.rSpeed;
-        h.opacity -= 0.0015;
-        drawHeart(ctx, h);
-        if (h.opacity <= 0) hearts.splice(i, 1);
-    });
+    hearts.forEach((h, i) => { h.vy += h.gravity; h.x += h.vx; h.y += h.vy; h.rotation += h.rSpeed; h.opacity -= 0.0015; drawHeart(ctx, h); if (h.opacity <= 0) hearts.splice(i, 1); });
     requestAnimationFrame(loop);
 }
 
@@ -337,41 +268,30 @@ function cerrarSplash() {
         document.getElementById('pantalla-splash').style.display = 'none';
         document.getElementById('pantalla-inicio').style.display = 'block';
         document.getElementById('ui-container').style.display = 'flex';
-        musicGame.play().catch(() => {});
-        estado = 'instrucciones';
+        musicGame.play().catch(() => {}); estado = 'instrucciones';
     }, 500);
 }
 
 function iniciarJuego() { document.getElementById('pantalla-inicio').style.display = 'none'; estado = 'jugando'; }
-function morir() { if (estado !== 'jugando') return; estado = 'error'; musicGame.pause(); musicGame.currentTime = 0; playSfx('fart', true); document.getElementById('pantalla-error').style.display = 'block'; }
-function reiniciarJuego() { score = 0; tubosContador = 0; ari.y = logicalHeight/2; ari.v = 0; nivel.reset(); scoreDisplay.innerText = "Simopiezas: 0 / 9"; document.getElementById('pantalla-error').style.display = 'none'; estado = 'jugando'; musicGame.play(); }
-function ganar() { estado = 'ganado'; document.getElementById('ui-container').style.display = 'none'; musicGame.pause(); musicGame.currentTime = 0; playSfx('yay'); setTimeout(() => { musicVictory.play(); }, 1500); document.getElementById('pantalla-recompensa').style.display = 'flex'; createHearts(); }
+function morir() { if (estado !== 'jugando') return; estado = 'error'; musicGame.pause(); musicGame.currentTime = 0; playSfx('fart'); document.getElementById('pantalla-error').style.display = 'block'; }
+function reiniciarJuego() { score = 0; tubosContador = 0; ari.y = logicalHeight/2; ari.v = 0; nivel.reset(); scoreDisplay.innerText = "Simopiezas: 0 / 9"; document.getElementById('pantalla-error').style.display = 'none'; estado = 'jugando'; musicGame.play().catch(() => {}); }
 
-function mostrarCarta() { 
-    playSfx('paper'); 
-    document.getElementById('pantalla-recompensa').style.display = 'none'; 
-    document.getElementById('sobre-abierto').style.display = 'flex'; 
+function ganar() { 
+    estado = 'ganado'; 
+    document.getElementById('ui-container').style.display = 'none'; 
+    musicGame.pause(); musicGame.currentTime = 0; 
+    playSfx('yay'); 
+    setTimeout(() => { playSfx('victory', true); }, 1500); 
+    document.getElementById('pantalla-recompensa').style.display = 'flex'; 
+    createHearts(); 
 }
 
-const saltar = () => { 
-    if (audioCtx.state === 'suspended') audioCtx.resume(); 
-    if (musicGame.paused && estado === 'jugando') musicGame.play();
-    if(estado === 'jugando') { ari.v = ari.salto; ari.aleteo = 10; playSfx('cuy'); } 
-};
+function mostrarCarta() { playSfx('paper'); document.getElementById('pantalla-recompensa').style.display = 'none'; document.getElementById('sobre-abierto').style.display = 'flex'; }
+const saltar = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); if (musicGame.paused && estado === 'jugando') musicGame.play(); if(estado === 'jugando') { ari.v = ari.salto; ari.aleteo = 10; playSfx('cuy'); } };
 
-document.getElementById('btn-comenzar').addEventListener('click', iniciarJuego); 
-document.getElementById('btn-reintentar').addEventListener('click', reiniciarJuego);
-
-window.addEventListener('touchstart', (e) => { 
-    if (estado === 'splash') cerrarSplash();
-    else if (e.target.tagName !== 'BUTTON' && !e.target.closest('#carta-container')) { e.preventDefault(); saltar(); } 
-}, {passive: false}); 
-
-window.addEventListener('mousedown', (e) => { 
-    if (estado === 'splash') cerrarSplash();
-    else if (e.target.tagName !== 'BUTTON' && !e.target.closest('#carta-container')) saltar(); 
-}); 
-
+document.getElementById('btn-comenzar').addEventListener('click', iniciarJuego); document.getElementById('btn-reintentar').addEventListener('click', reiniciarJuego);
+window.addEventListener('touchstart', (e) => { if (estado === 'splash') cerrarSplash(); else if (e.target.tagName !== 'BUTTON' && !e.target.closest('#carta-container')) { e.preventDefault(); saltar(); } }, {passive: false}); 
+window.addEventListener('mousedown', (e) => { if (estado === 'splash') cerrarSplash(); else if (e.target.tagName !== 'BUTTON' && !e.target.closest('#carta-container')) saltar(); }); 
 window.addEventListener('keydown', (e) => { if(e.code === 'Space') saltar(); });
 requestAnimationFrame(loop);
 </script>
