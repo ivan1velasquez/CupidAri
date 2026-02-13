@@ -2,109 +2,137 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Misión Simo: San Valentín ❤️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+    <title>❤️ My Cupid Ari ❤️</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            overflow: hidden; 
-            background: #ffdee9; /* Fondo de respaldo para toda la web */
-            font-family: 'Arial', sans-serif; 
-            touch-action: none; 
+        html, body { height: 100%; width: 100%; overflow: hidden; background: #ffdee9; font-family: 'Arial', sans-serif; touch-action: none; }
+        body { display: flex; justify-content: center; align-items: center; }
+        canvas { display: block; background-color: transparent; }
+        
+        /* --- PANTALLA SPLASH INICIAL --- */
+        #pantalla-splash {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffdee9; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 500;
+            cursor: pointer; transition: opacity 0.5s;
         }
-        canvas { 
-            display: block; 
-            margin: 0 auto; 
-            background-color: transparent; /* Eliminado el gris oscuro */
+        #logo-inicial {
+            width: 80%; max-width: 350px;
+            filter: drop-shadow(0 10px 20px rgba(255, 105, 180, 0.5));
+            margin-bottom: 30px;
+        }
+        .texto-click {
+            color: #d02090; font-weight: bold; font-size: 20px;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* --- UI DEL JUEGO --- */
+        #ui-container {
+            position: absolute; top: 60px; width: 100%; display: none;
+            justify-content: center; align-items: center; pointer-events: none; z-index: 10;
+        }
+        .score-text { color: white; font-size: 26px; font-weight: bold; text-shadow: 2px 2px 4px rgba(255, 105, 180, 1); margin: 0 15px; }
+        .score-icon { height: 35px; width: auto; filter: drop-shadow(2px 2px 2px rgba(255, 105, 180, 0.8)); }
+
+        .modal { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 20px; text-align: center; border: 6px solid #ff69b4; width: 85%; max-width: 400px; z-index: 100; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        
+        #pantalla-recompensa { 
+            display: none; 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 90%; 
+            max-width: 400px; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 120; 
         }
         
-        #ui {
-            position: absolute; top: 20px; width: 100%; text-align: center;
-            color: white; font-size: 24px; font-weight: bold;
-            text-shadow: 2px 2px 0px #ff69b4; pointer-events: none; z-index: 10;
+        .texto-instruccion { 
+            background: white; 
+            color: #d02090; 
+            padding: 15px; 
+            border-radius: 12px; 
+            border: 3px solid #ff69b4; 
+            font-weight: bold; 
+            font-size: 16px; 
+            margin-bottom: 20px; 
+            width: 100%; 
+            text-align: center; 
         }
 
-        /* Modals con fondo blanco sólido para legibilidad pero sin oscurecer el juego */
-        .modal {
-            display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); background: white;
-            padding: 30px; border-radius: 20px; text-align: center;
-            border: 6px solid #ff69b4; width: 85%; max-width: 400px; z-index: 100;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
+        .marco-foto-blanco { width: 100%; background: white; border: 10px solid white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 25px; display: flex; justify-content: center; }
+        #foto-completa-revelada { width: 100%; height: auto; display: block; }
 
-        /* Botón de Acción optimizado para móvil */
-        .btn-accion {
-            background: #ff69b4; color: white; border: none;
-            padding: 15px 30px; border-radius: 30px; font-weight: bold;
-            margin-top: 20px; cursor: pointer; font-size: 18px;
-            display: inline-block;
-            touch-action: manipulation; /* Mejora la respuesta táctil */
-        }
+        #carta-container { position: relative; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        #carta-container::before, #carta-container::after { content: ''; position: absolute; width: 85%; height: 85%; border-radius: 50%; border: 5px solid rgba(255, 105, 180, 0.7); animation: rippleEffect 2s infinite ease-out; z-index: -1; opacity: 0; }
+        #carta-container::after { animation-delay: 0.6s; }
 
-        /* Emoji de Carta Central Animado */
-        #btn-carta {
-            display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); font-size: 90px; cursor: pointer;
-            background: none; border: none; z-index: 150;
-            animation: heartBeat 1.5s infinite;
-            touch-action: manipulation;
-        }
+        #btn-carta-img { width: 140px; height: auto; filter: drop-shadow(0 8px 20px rgba(255, 105, 180, 0.6)); animation: heartBeat 1.5s infinite; }
 
-        @keyframes heartBeat {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            14% { transform: translate(-50%, -50%) scale(1.3); }
-            28% { transform: translate(-50%, -50%) scale(1); }
-            42% { transform: translate(-50%, -50%) scale(1.3); }
-            70% { transform: translate(-50%, -50%) scale(1); }
-        }
+        @keyframes heartBeat { 0% { transform: scale(1); } 14% { transform: scale(1.15); } 28% { transform: scale(1); } 42% { transform: scale(1.15); } 70% { transform: scale(1); } }
+        @keyframes rippleEffect { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.8); opacity: 0; } }
 
-        /* Contenedor Final */
-        #sobre-abierto {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: none; z-index: 200; flex-direction: column;
-            align-items: center; justify-content: center; padding: 20px;
+        #sobre-abierto { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .carta-texto { 
+            background: #fff0f5; 
+            color: #d02090; 
+            padding: 35px; 
+            border-radius: 20px; 
+            border: 4px dashed #ff69b4; 
+            max-width: 480px; 
+            width: 90%; 
+            text-align: center; 
+            box-shadow: 0 10px 60px rgba(0,0,0,0.3); 
+            line-height: 1.5; 
         }
-
-        .carta-texto {
-            background: #fff0f5; color: #d02090; padding: 25px;
-            border-radius: 15px; border: 3px dashed #ff69b4;
-            max-width: 350px; text-align: center; line-height: 1.6;
-            transform: scale(0); transition: transform 0.5s;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.2);
-        }
-
-        #foto-revelada {
-            width: 280px; border: 6px solid white; border-radius: 15px;
-            margin-bottom: 20px; opacity: 0; transition: opacity 1s;
-        }
+        .btn-accion { background: #ff69b4; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 18px; }
     </style>
 </head>
 <body>
 
-<div id="ui">Piezas de Simo: 0 / 9</div>
+<div id="pantalla-splash" onclick="cerrarSplash()">
+    <img id="logo-inicial" src="assets/ari_logo.png" alt="My Cupid Ari Logo">
+    <div class="texto-click">Pulsa en cualquier parte para jugar</div>
+</div>
 
-<div id="pantalla-inicio" class="modal" style="display: block;">
-    <h2 style="color: #ff1493;">¡Hola, mi amor! 🐹</h2>
-    <p style="margin: 15px 0;">Recolecta las 9 partes de la foto de Simo para ver tu sorpresa.</p>
-    <button class="btn-accion" id="btn-comenzar">¡Comenzar!</button>
+<div id="ui-container">
+    <img src="assets/puzzle.png" class="score-icon">
+    <span id="score-display" class="score-text">Simopiezas: 0 / 9</span>
+    <img src="assets/puzzle.png" class="score-icon">
+</div>
+
+<div id="pantalla-inicio" class="modal">
+    <h2 style="color: #ff1493;">❤️ ¡Hola, SKIBIDIAMOR! ❤️</h2>
+    <p style="margin: 15px 0;">¡El Ari necesita de tu ayudaaa!<br>Ayúdalo a recolectar las 9 Simopiezas del rompecabezas para encontrar a la Simo.</p>
+    <button class="btn-accion" id="btn-comenzar">JUGAR</button>
 </div>
 
 <div id="pantalla-error" class="modal">
-    <h2 style="color: #ff1493;">¡Casi! 😢</h2>
-    <p style="margin: 10px 0;">Ari se tropezó. ¡Inténtalo de nuevo!</p>
-    <button class="btn-accion" id="btn-reintentar">Reintentar</button>
+    <h2 style="color: #ff1493;">¡OH NO!</h2>
+    <p style="margin: 10px 0;">!El Ari choco contra un tubo!<br>💀💀💀💀💀</p>
+    <button class="btn-accion" id="btn-reintentar">REINTENTAR</button>
 </div>
 
-<button id="btn-carta">📩</button>
+<div id="pantalla-recompensa">
+    <div class="texto-instruccion">¡Ayudaste al Ari a juntar todas las Simopiezas!<br>¿Qué es esto?<br>La Simo tiene un mensaje especial para ti, pulsa el sobre para abrirlo.</div>
+    <div class="marco-foto-blanco"><img id="foto-completa-revelada" src="assets/simo_full.webp"></div>
+    <div id="carta-container" onclick="mostrarCarta()">
+        <img id="btn-carta-img" src="assets/carta.png" alt="Sobre rosa">
+    </div>
+</div>
 
 <div id="sobre-abierto">
-    <img id="foto-revelada" src="assets/simo_full.webp">
-    <div class="carta-texto" id="carta-contenido">
-        <p><strong>Para mi niña hermosa:</strong></p>
-        <p style="margin: 10px 0;">"Armaste cada pieza de nuestro rompecabezas. Eres lo mejor que me ha pasado."</p>
-        <p>— Te amo ❤️</p>
-        <button class="btn-accion" onclick="location.reload()">Jugar de nuevo</button>
+    <div class="carta-texto">
+        <p><strong>Para Noah:</strong></p>
+        <p style="margin: 10px 0;">"Hola amorcito, perdona lo poquito pero es un pequeño regalito que tenía para ti.<br>Al igual que en el juego encontraste todas las piezas,<br>Piezas que en cada cabecita de nosotros nos hacen decir una sola cosa:<br> Te amo ❤️"</p>
+        <p>— Feliz 14F, te amo mucho skibidiamorcito.</p>
+        <button class="btn-accion" onclick="location.reload()">CERRAR</button>
     </div>
 </div>
 
@@ -113,225 +141,239 @@
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const marcador = document.getElementById("ui");
+const scoreDisplay = document.getElementById("score-display");
 
-canvas.width = window.innerWidth > 480 ? 480 : window.innerWidth;
-canvas.height = window.innerHeight;
+const pCanvas = document.createElement('canvas');
+const pCtx = pCanvas.getContext('2d');
+const pSize = 65; 
+pCanvas.width = pSize; pCanvas.height = pSize;
 
-// --- ASSETS ---
-const assets = {};
-const piezasFotos = [];
-let cargados = 0;
+const dpr = Math.min(window.devicePixelRatio || 1, 2); 
+const logicalWidth = window.innerWidth > 480 ? 480 : window.innerWidth;
+const logicalHeight = document.documentElement.clientHeight; 
+canvas.width = logicalWidth * dpr; canvas.height = logicalHeight * dpr;
+canvas.style.width = logicalWidth + 'px'; canvas.style.height = logicalHeight + 'px';
+ctx.scale(dpr, dpr);
 
-function cargar(n, r) {
-    const img = new Image();
-    img.src = r;
-    img.onload = () => cargados++;
-    assets[n] = img;
+// --- WEB AUDIO API ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const buffers = {};
+async function loadSfx(url, name) {
+    try {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        buffers[name] = await audioCtx.decodeAudioData(arrayBuffer);
+    } catch(e) { console.error("Error cargando:", name); }
 }
 
-cargar('fondo', 'assets/background.jpg');
-cargar('tubo', 'assets/pipe.png');
-cargar('ariUp', 'assets/ari_up.png');
-cargar('ariDown', 'assets/ari_down.png');
+// Carga de sonidos
+loadSfx('assets/cuy_sound.m4a', 'cuy');
+loadSfx('assets/fart.m4a', 'fart');
+loadSfx('assets/item.m4a', 'item');
+loadSfx('assets/paper.m4a', 'paper');
+loadSfx('assets/yay.m4a', 'yay');
 
-for(let i=1; i<=9; i++) {
-    const img = new Image();
-    img.src = `assets/simo${i}.webp`;
-    piezasFotos.push(img);
+function playSfx(name, fade = false) {
+    if (!buffers[name]) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffers[name];
+    const gainNode = audioCtx.createGain();
+    if (fade) {
+        const startTime = audioCtx.currentTime;
+        gainNode.gain.setValueAtTime(1.0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.01, startTime + buffers[name].duration);
+    } else { gainNode.gain.value = 1.0; }
+    source.connect(gainNode); gainNode.connect(audioCtx.destination); source.start(0);
 }
 
-// --- CONFETI ---
-const particles = [];
-function createConfetti() {
-    for (let i = 0; i < 100; i++) {
-        particles.push({
-            x: canvas.width / 2, y: canvas.height / 2,
-            size: Math.random() * 8 + 4,
-            color: `hsl(${Math.random() * 30 + 330}, 100%, 65%)`, // Tonos rosas/púrpuras
-            vx: (Math.random() - 0.5) * 10,
-            vy: (Math.random() - 0.5) * 10,
-            gravity: 0.1, opacity: 1
+const musicGame = new Audio('assets/game_music.mp3');
+const musicVictory = new Audio('assets/victory_music.mp3');
+musicGame.volume = 0.35; musicVictory.volume = 0.35;
+musicGame.loop = true; musicVictory.loop = true;
+
+// --- ASSETS IMÁGENES ---
+const assets = {}; const piezasFotos = []; let cargados = 0;
+function cargar(n, r) { const img = new Image(); img.src = r; img.onload = () => cargados++; assets[n] = img; }
+cargar('fondo', 'assets/background.jpg'); cargar('tubo', 'assets/pipe.png');
+cargar('ariUp', 'assets/ari_up.png'); cargar('ariDown', 'assets/ari_down.png');
+cargar('puzzleMask', 'assets/puzzle.png'); cargar('puzzleFrame', 'assets/frame.png');
+for(let i=1; i<=9; i++) { const img = new Image(); img.src = `assets/simo${i}.webp`; piezasFotos.push(img); }
+
+const hearts = [];
+function createHearts() {
+    for (let i = 0; i < 600; i++) { 
+        hearts.push({
+            x: logicalWidth / 2, y: logicalHeight / 2 + 150,
+            size: Math.random() * 14 + 8,
+            color: `hsl(${Math.random() * 50 + 320}, 100%, ${Math.random() * 30 + 60}%)`,
+            vx: (Math.random() - 0.5) * 18, vy: (Math.random() * -22) - 8,  
+            gravity: 0.25, rotation: Math.random() * Math.PI * 2,
+            rSpeed: (Math.random() - 0.5) * 0.2, opacity: 1
         });
     }
 }
 
-// --- FÍSICA ---
-let estado = 'inicio';
-let score = 0;
-let frames = 0;
-let tubosContador = 0;
-const vel = 2.3;
+function drawHeart(ctx, h) {
+    ctx.save();
+    ctx.translate(h.x, h.y); ctx.rotate(h.rotation);
+    ctx.globalAlpha = h.opacity; ctx.fillStyle = h.color;
+    ctx.beginPath(); const s = h.size;
+    ctx.moveTo(0, s / 4); ctx.quadraticCurveTo(0, 0, -s / 2, 0); ctx.quadraticCurveTo(-s, 0, -s, s / 2);
+    ctx.quadraticCurveTo(-s, s, 0, s * 1.25); ctx.quadraticCurveTo(s, s, s, s / 2);
+    ctx.quadraticCurveTo(s, 0, s / 2, 0); ctx.quadraticCurveTo(0, 0, 0, s / 4);
+    ctx.fill(); ctx.restore();
+}
 
+// --- FUNCIÓN ACTUALIZADA PARA RELLENAR EL PUZZLE ---
+function drawSafePuzzlePiece(mainCtx, x, y, imgFragment) {
+    if (!assets.puzzleMask.complete || !assets.puzzleFrame.complete) return;
+    pCtx.clearRect(0, 0, pSize, pSize);
+
+    // Lógica para que la imagen rellene (aspect fill/cover) el área de la pieza
+    const imgAspect = imgFragment.width / imgFragment.height;
+    const canvasAspect = pSize / pSize;
+    let renderW, renderH, renderX, renderY;
+
+    if (imgAspect > canvasAspect) {
+        renderH = pSize;
+        renderW = pSize * imgAspect;
+        renderX = (pSize - renderW) / 2;
+        renderY = 0;
+    } else {
+        renderW = pSize;
+        renderH = pSize / imgAspect;
+        renderX = 0;
+        renderY = (pSize - renderH) / 2;
+    }
+
+    // Dibujar la imagen centrada y escalada para rellenar
+    pCtx.drawImage(imgFragment, renderX, renderY, renderW, renderH);
+    
+    pCtx.globalCompositeOperation = 'destination-in';
+    pCtx.drawImage(assets.puzzleMask, 0, 0, pSize, pSize);
+    
+    pCtx.globalCompositeOperation = 'source-over';
+    pCtx.drawImage(assets.puzzleFrame, 0, 0, pSize, pSize);
+    
+    mainCtx.drawImage(pCanvas, x, y);
+}
+
+let lastTime = performance.now(); let estado = 'splash'; let score = 0; let tubosContador = 0; const baseVel = 160; 
 const ari = {
-    x: 60, y: canvas.height/2, w: 60, h: 50,
-    v: 0, g: 0.38, salto: -5.8, // Salto suave solicitado
-    rot: 0, aleteo: 0,
-    actualizar() {
-        this.v += this.g;
-        this.y += this.v;
+    x: 60, y: logicalHeight/2, w: 60, h: 50, v: 0, g: 1450, salto: -360, rot: 0, aleteo: 0,
+    actualizar(dt) {
+        this.v += this.g * dt; this.y += this.v * dt;
         this.rot = this.v < 0 ? -0.2 : 0.2;
-        if(this.aleteo > 0) this.aleteo--;
-        if(this.y > canvas.height || this.y < 0) morir();
+        if(this.aleteo > 0) this.aleteo -= dt * 60;
+        if(this.y > logicalHeight || this.y < 0) morir();
     },
     dibujar() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.rot);
+        ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.rot);
         let img = this.aleteo > 0 ? assets.ariDown : assets.ariUp;
-        if(img.complete) ctx.drawImage(img, -this.w/2, -this.h/2, this.w, this.h);
+        if(img && img.complete) ctx.drawImage(img, -this.w/2, -this.h/2, this.w, this.h);
         ctx.restore();
     }
 };
 
 const nivel = {
-    tubos: [], piezas: [],
-    actualizar() {
-        if(frames % 110 === 0) {
-            tubosContador++;
-            let gap = 200;
-            let top = Math.random() * (canvas.height - gap - 240) + 120;
-            this.tubos.push({x: canvas.width, t: top, b: top + gap});
-            
-            // Intercalado: Pieza cada 2 tuberías
+    tubos: [], piezas: [], nextTubo: 0,
+    reset() { this.tubos = []; this.piezas = []; this.nextTubo = 0; },
+    actualizar(dt) {
+        this.nextTubo -= dt;
+        if(this.nextTubo <= 0) {
+            this.nextTubo = 1.4; tubosContador++;
+            let gap = 200; let top = Math.random() * (logicalHeight - gap - 240) + 120;
+            this.tubos.push({x: logicalWidth, t: top, b: top + gap});
             if(tubosContador % 2 === 0 && score < 9) {
-                this.piezas.push({
-                    x: canvas.width + 120, y: top + gap/2, img: piezasFotos[score]
-                });
+                this.piezas.push({ x: logicalWidth + 120, y: top + gap/2 - 30, img: piezasFotos[score] });
             }
         }
-
         this.tubos.forEach((t, i) => {
-            t.x -= vel;
-            if(ari.x + 15 > t.x && ari.x - 15 < t.x + 80) {
-                if(ari.y - 12 < t.t || ari.y + 12 > t.b) morir();
-            }
+            t.x -= baseVel * dt;
+            if(ari.x + 18 > t.x && ari.x - 18 < t.x + 80 && (ari.y - 15 < t.t || ari.y + 15 > t.b)) morir();
             if(t.x < -100) this.tubos.splice(i, 1);
         });
-
         this.piezas.forEach((p, i) => {
-            p.x -= vel;
-            let dist = Math.hypot(ari.x - p.x, ari.y - p.y);
-            if(dist < 45) {
-                this.piezas.splice(i, 1);
-                score++;
-                marcador.innerText = `Piezas de Simo: ${score} / 9`;
+            p.x -= baseVel * dt;
+            if(Math.hypot(ari.x - (p.x + 30), ari.y - (p.y + 30)) < 48) {
+                this.piezas.splice(i, 1); score++; playSfx('item');
+                scoreDisplay.innerText = `Simopiezas: ${score} / 9`;
                 if(score === 9) ganar();
             }
         });
     },
     dibujar() {
         this.tubos.forEach(t => {
-            if(assets.tubo.complete) {
+            if(assets.tubo && assets.tubo.complete) {
                 ctx.save(); ctx.translate(t.x + 40, t.t); ctx.scale(1, -1);
                 ctx.drawImage(assets.tubo, -40, 0, 80, t.t); ctx.restore();
-                ctx.drawImage(assets.tubo, t.x, t.b, 80, canvas.height - t.b);
+                ctx.drawImage(assets.tubo, t.x, t.b, 80, logicalHeight - t.b);
             }
         });
-        this.piezas.forEach(p => {
-            if(p.img.complete) {
-                ctx.drawImage(p.img, p.x - 25, p.y - 25, 55, 55);
-                ctx.strokeStyle = "white"; ctx.lineWidth = 3;
-                ctx.strokeRect(p.x - 25, p.y - 25, 55, 55);
-            }
-        });
+        this.piezas.forEach(p => { if(p.img && p.img.complete) drawSafePuzzlePiece(ctx, p.x, p.y, p.img); });
     }
 };
 
-function loop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if(assets.fondo.complete) {
-        ctx.drawImage(assets.fondo, 0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.fillStyle = "#ffdee9";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    
-    if(estado === 'jugando') {
-        ari.actualizar();
-        nivel.actualizar();
-        frames++;
-    }
-    
-    nivel.dibujar();
-    ari.dibujar();
-
-    if (particles.length > 0) {
-        particles.forEach((p, i) => {
-            p.vy += p.gravity; p.x += p.vx; p.y += p.vy; p.opacity -= 0.008;
-            ctx.globalAlpha = Math.max(0, p.opacity); ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, p.size, p.size);
-            if (p.opacity <= 0) particles.splice(i, 1);
-        });
-        ctx.globalAlpha = 1;
-    }
-    
+function loop(timestamp) {
+    let dt = (timestamp - lastTime) / 1000; lastTime = timestamp; if (dt > 0.1) dt = 0.016; 
+    ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+    if(assets.fondo && assets.fondo.complete) ctx.drawImage(assets.fondo, 0, 0, logicalWidth, logicalHeight);
+    if(estado === 'jugando') { ari.actualizar(dt); nivel.actualizar(dt); }
+    nivel.dibujar(); ari.dibujar();
+    hearts.forEach((h, i) => {
+        h.vy += h.gravity; h.x += h.vx; h.y += h.vy; h.rotation += h.rSpeed;
+        h.opacity -= 0.0015;
+        drawHeart(ctx, h);
+        if (h.opacity <= 0) hearts.splice(i, 1);
+    });
     requestAnimationFrame(loop);
 }
 
-// --- GESTIÓN DE EVENTOS ---
-function iniciarJuego() {
-    document.getElementById('pantalla-inicio').style.display = 'none';
-    estado = 'jugando';
-}
-
-function morir() {
-    estado = 'error';
-    document.getElementById('pantalla-error').style.display = 'block';
-}
-
-function reiniciarJuego() {
-    score = 0; frames = 0; tubosContador = 0;
-    ari.y = canvas.height/2; ari.v = 0;
-    nivel.tubos = []; nivel.piezas = [];
-    marcador.innerText = "Piezas de Simo: 0 / 9";
-    document.getElementById('pantalla-error').style.display = 'none';
-    estado = 'jugando';
-}
-
-function ganar() {
-    estado = 'ganado';
-    marcador.style.display = 'none';
-    document.getElementById('btn-carta').style.display = 'block';
-}
-
-function mostrarCarta() {
-    document.getElementById('btn-carta').style.display = 'none';
-    document.getElementById('sobre-abierto').style.display = 'flex';
+function cerrarSplash() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    document.getElementById('pantalla-splash').style.opacity = '0';
     setTimeout(() => {
-        document.getElementById('foto-revelada').style.opacity = 1;
-        document.getElementById('carta-contenido').style.transform = 'scale(1)';
-        createConfetti();
-    }, 300);
+        document.getElementById('pantalla-splash').style.display = 'none';
+        document.getElementById('pantalla-inicio').style.display = 'block';
+        document.getElementById('ui-container').style.display = 'flex';
+        musicGame.play().catch(() => {});
+        estado = 'instrucciones';
+    }, 500);
 }
 
-// BOTONES CON SOPORTE TÁCTIL DIRECTO
-document.getElementById('btn-comenzar').addEventListener('touchstart', (e) => { e.stopPropagation(); iniciarJuego(); });
-document.getElementById('btn-comenzar').addEventListener('click', iniciarJuego);
+function iniciarJuego() { document.getElementById('pantalla-inicio').style.display = 'none'; estado = 'jugando'; }
+function morir() { if (estado !== 'jugando') return; estado = 'error'; musicGame.pause(); musicGame.currentTime = 0; playSfx('fart', true); document.getElementById('pantalla-error').style.display = 'block'; }
+function reiniciarJuego() { score = 0; tubosContador = 0; ari.y = logicalHeight/2; ari.v = 0; nivel.reset(); scoreDisplay.innerText = "Simopiezas: 0 / 9"; document.getElementById('pantalla-error').style.display = 'none'; estado = 'jugando'; musicGame.play(); }
+function ganar() { estado = 'ganado'; document.getElementById('ui-container').style.display = 'none'; musicGame.pause(); musicGame.currentTime = 0; playSfx('yay'); setTimeout(() => { musicVictory.play(); }, 1500); document.getElementById('pantalla-recompensa').style.display = 'flex'; createHearts(); }
 
-document.getElementById('btn-reintentar').addEventListener('touchstart', (e) => { e.stopPropagation(); reiniciarJuego(); });
+function mostrarCarta() { 
+    playSfx('paper'); 
+    document.getElementById('pantalla-recompensa').style.display = 'none'; 
+    document.getElementById('sobre-abierto').style.display = 'flex'; 
+}
+
+const saltar = () => { 
+    if (audioCtx.state === 'suspended') audioCtx.resume(); 
+    if (musicGame.paused && estado === 'jugando') musicGame.play();
+    if(estado === 'jugando') { ari.v = ari.salto; ari.aleteo = 10; playSfx('cuy'); } 
+};
+
+document.getElementById('btn-comenzar').addEventListener('click', iniciarJuego); 
 document.getElementById('btn-reintentar').addEventListener('click', reiniciarJuego);
 
-document.getElementById('btn-carta').addEventListener('touchstart', (e) => { e.stopPropagation(); mostrarCarta(); });
-document.getElementById('btn-carta').addEventListener('click', mostrarCarta);
+window.addEventListener('touchstart', (e) => { 
+    if (estado === 'splash') cerrarSplash();
+    else if (e.target.tagName !== 'BUTTON' && !e.target.closest('#carta-container')) { e.preventDefault(); saltar(); } 
+}, {passive: false}); 
 
-const saltar = () => { if(estado === 'jugando') { ari.v = ari.salto; ari.aleteo = 10; } };
-
-window.addEventListener('touchstart', (e) => {
-    // Si el toque NO es en un botón, entonces es un salto
-    if (e.target.tagName !== 'BUTTON') {
-        e.preventDefault();
-        saltar();
-    }
-}, {passive: false});
-
-window.addEventListener('mousedown', (e) => {
-    if (e.target.tagName !== 'BUTTON') saltar();
-});
+window.addEventListener('mousedown', (e) => { 
+    if (estado === 'splash') cerrarSplash();
+    else if (e.target.tagName !== 'BUTTON' && !e.target.closest('#carta-container')) saltar(); 
+}); 
 
 window.addEventListener('keydown', (e) => { if(e.code === 'Space') saltar(); });
-
-loop();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
